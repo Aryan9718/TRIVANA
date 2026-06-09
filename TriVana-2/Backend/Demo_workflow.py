@@ -1,9 +1,10 @@
+
 import pandas as pd
 import numpy as np
 import json
 
 # 1️⃣ Load cumulative file, skipping NASA comment lines
-file_path = '/content/clean_labels_with_derived_cleaned.csv'
+file_path = '/content/cumulative_2025.09.06_23.30.01.csv'
 df = pd.read_csv(file_path, comment='#')
 
 print("Columns detected:", df.columns)
@@ -38,12 +39,10 @@ df['pl_eqt'] = df['koi_teq']
 
 # 4️⃣ Function to generate JSON for a single planet row
 def planet_to_json(planet):
-    disposition = str(planet.get("koi_disposition", "Unknown")).title()
-    prob = 1.0 if disposition.upper() == "CANDIDATE" else 0.0
+    prob = 1.0 if str(planet.get("koi_disposition", "")).upper() == "CANDIDATE" else 0.0
 
     return {
         "Kepid": int(planet['kepid']),
-        "koi_disposition": disposition,   # ✅ added this line
         "prob_existence": prob,
         "features": {
             "pl_orbsmax": float(planet.get("pl_orbsmax", 0.0)),
@@ -62,9 +61,8 @@ planet_row = df[df['kepid'] == kepid_input]
 
 if not planet_row.empty:
     planet_json = planet_to_json(planet_row.iloc[0])
-
-    # ✅ print both JSON and the classification
-    print(f"\nDisposition: {planet_json['koi_disposition']}")
     print(json.dumps(planet_json, indent=4))
 else:
     print(f"No planet found with Kepid {kepid_input}")
+
+
